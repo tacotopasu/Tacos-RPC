@@ -32,12 +32,12 @@ def ConnectRPC(buttonState, game, con):
     if(buttonState == "False"):            
         rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
         large_text=text["imageText"], start= timee,
-        buttons=[{"label": "Twitch", "url": "https://twitch.tv/avocadoism"}])
+        buttons=[{"label": button1["label"], "url": button1["url"]}])
     elif(buttonState == "True"):
         rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
         large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-        buttons=[{"label": "Twitch", "url": "https://twitch.tv/avocadoism"},
-                 {"label": "Steam", "url": "https://steamcommunity.com/id/pan0rama"}])
+        buttons=[{"label": button1["label"], "url": button1["url"]},
+                 {"label": button2["label"], "url": button2["url"]}])
 ConnectRPC(secondButton, "", Connected)
 Connected = True
 
