@@ -1,6 +1,6 @@
 from pypresence import Presence as DiscordRichPresence
 from configparser import ConfigParser
-import base64, time, os, requests
+import time, os
 
 keepGoing = True
 Connected = False
@@ -17,6 +17,7 @@ button1 = config["BUTTON1"]
 button2 = config["BUTTON2"]
 text = config["TEXT"]
 image = config["IMAGE"]
+sleeping = config["SLEEPING"]
 timee = time.time()
 
 # Connect RPC Function 
@@ -49,13 +50,14 @@ while(keepGoing):
         keepGoing = False
         ConnectRPC(secondButton, "", Connected)
    
+# Example usage:
     elif(choice.lower() == "ramen"):          
         rpc.update(details= "Ramen Cafe", state= "Discord Server", large_image= "ramen",
             large_text= "Ramen Cafe - Discord Server",
             buttons=[{"label": "Join now!", "url": "https://discord.st/ramen"}])
     
-    elif(choice.lower() == "sleeping"):           
-        rpc.update(details= "I am now sleeping. Feel free to message me", state= "though! I will answer as soon as I wake up", large_image= "astortion")
+    elif(choice.lower() == "sleeping" or choice.lower() == "sleep"):           
+        rpc.update(details= sleeping["details"], state= sleeping["state"], large_image= sleeping["large"], large_text= sleeping["largeText"])
     
     else:
         ConnectRPC(secondButton, choice, Connected)
