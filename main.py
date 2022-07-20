@@ -39,13 +39,19 @@ def ConnectRPC(buttonState, game, con):
         large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
         buttons=[{"label": button1["label"], "url": button1["url"]},
                  {"label": button2["label"], "url": button2["url"]}])
+
+
 ConnectRPC(secondButton, "", Connected)
 Connected = True
 
 
+def Logo():
+    print("\033[35m _____               _        __    ___  ___ \n/__   \__ _  ___ ___( )__    /__\  / _ \/ __\ \n  / /\/ _` |/ __/ _ \/ __|  / \// / /_)/ /  \n / / | (_| | (_| (_) \__ \ / _  \/ ___/ /___ \n \/   \__,_|\___\___/|___/ \/ \_/\/   \____/\033[0m")
+
 while(keepGoing):
     os.system('cls')
-    choice = input("What game are you playing right now? (Press Enter to close.)\n> ")
+    Logo()
+    choice = input("\n\n\033[1mWhat game are you playing right now? (Press Enter to close.)\n> ")
     if(choice == ""):
         keepGoing = False
         ConnectRPC(secondButton, "", Connected)
