@@ -12,17 +12,28 @@ config.read("settings.ini")
 #Get all the needed vars
 richpresence = config["TEXT"]["rpc"]
 rpc = DiscordRichPresence(richpresence, pipe = 0)
-secondButton = config["BUTTON"]["secondButton"]
-button1 = config["BUTTON1"]
-button2 = config["BUTTON2"]
-text = config["TEXT"]
-image = config["IMAGE"]
-sleeping = config["SLEEPING"]
-timee = time.time()
+
+def Setup():
+    # Load config
+    config = ConfigParser()
+    config.read("settings.ini")
+
+    global secondButton, button1, button2, text, image, sleeping, timee
+
+    #Get all the needed vars
+    secondButton = config["BUTTON"]["secondButton"]
+    button1 = config["BUTTON1"]
+    button2 = config["BUTTON2"]
+    text = config["TEXT"]
+    image = config["IMAGE"]
+    sleeping = config["SLEEPING"]
+    timee = time.time()
+    
 
 # Connect RPC Function 
 def ConnectRPC(buttonState, game, con):
 
+    Setup()
     if(not con):
         rpc.connect()
     if(game == ""):
@@ -32,7 +43,7 @@ def ConnectRPC(buttonState, game, con):
 
     if(buttonState == "False"):            
         rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-        large_text=text["imageText"], start= timee,
+        large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
         buttons=[{"label": button1["label"], "url": button1["url"]}])
     elif(buttonState == "True"):
         rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
@@ -40,7 +51,7 @@ def ConnectRPC(buttonState, game, con):
         buttons=[{"label": button1["label"], "url": button1["url"]},
                  {"label": button2["label"], "url": button2["url"]}])
 
-
+Setup()
 ConnectRPC(secondButton, "", Connected)
 Connected = True
 
@@ -54,7 +65,6 @@ while(keepGoing):
     choice = input("\n\n\033[1mWhat game are you playing right now? (Press Enter to close.)\n> ")
     if(choice == ""):
         keepGoing = False
-        ConnectRPC(secondButton, "", Connected)
    
 # Example usage:
     elif(choice.lower() == "ramen"):          
