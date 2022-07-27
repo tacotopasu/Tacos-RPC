@@ -192,6 +192,10 @@ while keepGoing:
     Logo()
     choice = input("\n\nWhat game are you playing right now? (Press Enter to close.)\n> ")
     if choice == "":
-        keepGoing = False
+        PPrint('', 'Are you sure you want to exit? Press Enter to confirm (Type anything to cancel).')
+        exitt = input()
+        if exitt == '': keepGoing = False
     else:
         ConnectRPC(secondButton, choice, Connected)
+
+
