@@ -1,13 +1,13 @@
 # Taco's RPC
 
-🚀A Discord Custom Rich Presence Application
+🚀A Customizable Discord Custom Rich Presence Application
 
 [![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=python&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
 
 ✅ Download the Latest Release here: <a href="https://github.com/tacotopasu/latestreleaselinkhere"  target="_BLANK">Latest Release</a>
 
   <p align="center">
-   Made with ❤️ by <a href="https://twitter.com/tacotopasu"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/tacotopasu?style=social"> </a>
+   Made with ❤️ by @tacotopasu <a href="https://twitter.com/tacotopasu"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/tacotopasu?style=social"> </a>
   </p>
 
 
@@ -34,4 +34,4 @@ All contributions, issues and feature requests are welcome! 😍
 
 Give a ⭐️ if this project helped you! 🥰
 
-If you like this app , Star it on Github, Follow me on Twitter!
+Perhaps leave me a follow on Twitter too! ;3
