@@ -12,7 +12,7 @@ def Setup():
     config = ConfigParser()
     config.read("settings.ini")
 
-    global secondButton, button1, button2, text, image, sleeping, timee
+    global secondButton, button1, button2, text, image, sleeping, vr, timee
 
     #Get all the needed vars
     secondButton = config["BUTTON"]["secondButton"]
@@ -21,6 +21,7 @@ def Setup():
     text = config["TEXT"]
     image = config["IMAGE"]
     sleeping = config["SLEEPING"]
+    vr = config["VR"]
     timee = time.time()
     
 def PPrint(status, text): # Easier method for printing out better looking warnings and errors
@@ -142,18 +143,19 @@ def ConnectRPC(buttonState, game, con):
             buttons=[{"label": button1["label"], "url": button1["url"]},
                      {"label": button2["label"], "url": button2["url"]}])
     else:
-        if game.lower() not in modes:
-            statee = game
-            if buttonState == "False":            
-                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-                large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                buttons=[{"label": button1["label"], "url": button1["url"]}])
-            elif buttonState == "True":
-                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-                large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                buttons=[{"label": button1["label"], "url": button1["url"]},
-                         {"label": button2["label"], "url": button2["url"]}])
-            
+        if game.lower().startswith("vr:"):
+            if game.lower() not in modes:
+                statee = game[3:]
+                if buttonState == "False":          
+                    rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
+                            large_text=vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
+                            buttons=[{"label": button1["label"], "url": button1["url"]}])
+                elif buttonState == "True":
+                    rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
+                            large_text= vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
+                            buttons=[{"label": button1["label"], "url": button1["url"]},
+                                     {"label": button2["label"], "url": button2["url"]}])            
+   
 
     # Ramen Cafe
     if game.lower() == "ramen":          
