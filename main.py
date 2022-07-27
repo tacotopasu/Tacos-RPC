@@ -1,7 +1,6 @@
-from tracemalloc import stop
 from pypresence import Presence as DiscordRichPresence
 from configparser import ConfigParser
-import time, os, psutil, requests, threading, multiprocessing
+import time, os, psutil, requests
 
 keepGoing = True
 Connected = False
