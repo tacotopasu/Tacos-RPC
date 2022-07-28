@@ -142,18 +142,17 @@ def ConnectRPC(buttonState, game, con):
             buttons=[{"label": button1["label"], "url": button1["url"]},
                      {"label": button2["label"], "url": button2["url"]}])
     else:
-        if game.lower().startswith("vr:"):
-            if game.lower() not in modes:
-                statee = game[3:]
-                if buttonState == "False":          
-                    rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
-                            large_text=vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
-                            buttons=[{"label": button1["label"], "url": button1["url"]}])
-                elif buttonState == "True":
-                    rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
-                            large_text= vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
-                            buttons=[{"label": button1["label"], "url": button1["url"]},
-                                     {"label": button2["label"], "url": button2["url"]}])            
+        if game.lower() not in modes:
+            statee = game
+            if buttonState == "False":          
+                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
+                           large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
+                           buttons=[{"label": button1["label"], "url": button1["url"]}])
+            elif buttonState == "True":
+                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
+                           large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
+                           buttons=[{"label": button1["label"], "url": button1["url"]},
+                                    {"label": button2["label"], "url": button2["url"]}])           
    
 
     # Ramen Cafe
@@ -187,16 +186,40 @@ Setup()
 ConnectRPC(secondButton, "", Connected)
 Connected = True
 
-
-while keepGoing:
-    os.system('cls')
-    Logo()
-    choice = input("\n\nWhat game are you playing right now? (Press Enter to close.)\n> ")
-    if choice == "":
-        PPrint('', 'Are you sure you want to exit? Press Enter to confirm (Type anything to cancel).')
-        exitt = input()
-        if exitt == '': keepGoing = False
-    else:
-        ConnectRPC(secondButton, choice, Connected)
-
+vrMode = False
+while True:
+    if keepGoing:
+        os.system('cls')
+        Logo()
+        choice = input("\n\nWhat game are you playing right now? (Press Enter to close.)\n> ")
+        if choice == "":
+            PPrint('', 'Are you sure you want to exit? Press Enter to confirm (Type anything to cancel).')
+            exitt = input()
+            if exitt == '': exit()
+        if choice.lower() == 'vr':
+            vrMode = True
+            keepGoing = False
+        else:
+            ConnectRPC(secondButton, choice, Connected)
+    if vrMode:
+        buttonState = secondButton
+        os.system('cls')
+        PPrint('', 'What game are you playing right now? (Press Enter to leave VR Mode.)')
+        choice = input('> ')
+        if choice != "":
+            statee = choice
+            if buttonState == "False":          
+                rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
+                        large_text=vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
+                        buttons=[{"label": button1["label"], "url": button1["url"]}])
+            elif buttonState == "True":
+                rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
+                        large_text= vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
+                        buttons=[{"label": button1["label"], "url": button1["url"]},
+                                {"label": button2["label"], "url": button2["url"]}])
+        else:
+            keepGoing = True
+            vrMode = False
+            time.sleep(1)
+            ConnectRPC(secondButton, "", Connected)
 
