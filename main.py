@@ -25,17 +25,58 @@ def Setup():
     
 def PPrint(status, text): # Easier method for printing out better looking warnings and errors
     if status == 'warn':
-        status = '\033[33m [Warn]'
+        status = '\033[33m[Warn] '
     elif status == 'error':
         status = '\033[31m[Error]'
     elif status == 'fatal':
         status = '\033[31m[Fatal]'
     else:
-        status = '\033[35m [Info]'
+        status = '\033[35m[Info] '
     
     print("\033[0m\033[1m" + status + f"\033[0m \033[1m{text}")
 
 
+def Sleep():
+    os.system('cls')
+    Logo()
+    rpc.update(details= sleeping["details"], state= sleeping["state"], large_image= sleeping["large"], large_text= sleeping["largeText"])
+    print('\n')
+    PPrint('', 'Currently sleeping...')
+    PPrint('', 'Press Enter to wake up.')
+    input()
+    os.system('cls')
+    ConnectRPC(secondButton, "Just woke up...", Connected)
+
+
+def Mode(mode):
+    modee = mode.lower()
+    modes = ['ramen', 'sleep', 'afk']
+    if modee in modes:
+        if modee == "ramen":
+            rpc.update(details= "Ramen Cafe", state= "Discord Server", large_image= "ramen",
+            large_text= "Ramen Cafe - Discord Server",
+            buttons=[{"label": "Join now!", "url": "https://discord.st/ramen"}])
+        elif modee == "afk":
+            rpc.update(details= "AFK", state= "I'm currently busy touching grass.", large_image= "https://c.tenor.com/vpC3CpgHtT0AAAAM/persona5-tae-takemi.gif",
+            large_text= "Away from keyboard",
+            buttons=[{"label": "Join now!", "url": "https://tacotopasu.com/discord"}])
+        elif modee == "sleep":
+            Sleep()
+    else:
+        if modee == "": # When the mode is null, replace it with the default var
+            mode = text["state"]
+        if secondButton == "False":          
+            rpc.update(details= text["details"], state= mode, large_image= image["largeImage"],
+                        large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
+                        buttons=[{"label": button1["label"], "url": button1["url"]}])
+        elif secondButton == "True":
+            rpc.update(details= text["details"], state= mode, large_image= image["largeImage"],
+                        large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
+                        buttons=[{"label": button1["label"], "url": button1["url"]},
+                                 {"label": button2["label"], "url": button2["url"]}])  
+
+
+    
 config = ConfigParser()
 config.read("settings.ini")
 # Try to read settings.ini, if file isn't there, create template file
@@ -72,18 +113,23 @@ try:
     richpresence = config["TEXT"]["rpc"]
 except:
     PPrint('fatal', "Couldn't get 'Discord Application ID' from 'settings.ini'.")
-    PPrint('info', "Get your Discord Application ID at 'https://discord.com/developers/applications'.")
+    PPrint('', "Get your Discord Application ID at 'https://discord.com/developers/applications'.")
     input('\nPress Enter to close.')
     exit()
 # Try to use RPC's Client ID
 try:
-    PPrint('info', 'Initializing RPC...')
+    PPrint('', 'Initializing RPC...')
     rpc = DiscordRichPresence(richpresence, pipe = 0)
 except:
+    ## IF DISCORD IS RUNNING - MAKE CHECK NOWWW!!!!!
+    if("Discord.exe" not in (i.name() for i in psutil.process_iter())):
+        PPrint('fatal', 'Discord is not open! Open discord and then try opening me again!')
+        input('\nPress Enter to close.')
+        exit()
     PPrint('fatal', "Couldn't connect using the Discord Application ID that was set in 'settings.ini'.")
-    PPrint('info', "This can be caused by a lack of connection to the internet or an invalid Discord Application ID.")
-    PPrint('info', "Check your Internet connection and if the error persists run 'setup.py'.")
-    PPrint('info', "If you haven't yet, get your Discord Application ID at 'https://discord.com/developers/applications'.")
+    PPrint('', "This can be caused by a lack of connection to the internet or an invalid Discord Application ID.")
+    PPrint('', "Check your Internet connection and if the error persists run 'setup.py'.")
+    PPrint('', "If you haven't yet, get your Discord Application ID at 'https://discord.com/developers/applications'.")
     input('\nPress Enter to close.')
     exit()
 
@@ -92,17 +138,6 @@ except:
 def Logo():
     print("\u001b[35m _____               _        __    ___  ___ \n/__   \__ _  ___ ___( )__    /__\  / _ \/ __\ \n  / /\/ _` |/ __/ _ \/ __|  / \// / /_)/ /  \n / / | (_| | (_| (_) \__ \ / _  \/ ___/ /___ \n \/   \__,_|\___\___/|___/ \/ \_/\/   \____/\033[0m")
 
-
-def Sleep():
-    os.system('cls')
-    Logo()
-    rpc.update(details= sleeping["details"], state= sleeping["state"], large_image= sleeping["large"], large_text= sleeping["largeText"])
-    print('\n')
-    PPrint('', 'Currently sleeping...')
-    PPrint('', 'Press Enter to wake up.')
-    input()
-    os.system('cls')
-    ConnectRPC(secondButton, "Just woke up...", Connected)
 
 stopStats = 0
 def Stats(): # Loops forever, I'll finish later...
@@ -126,7 +161,7 @@ def ConnectRPC(buttonState, game, con):
             PPrint('info', 'RPC Connected.')
             time.sleep(1)
         except:
-            PPrint('fatal', "Couldn't connect RPC. Check if the Application ID is correct (Located in settings.ini).")
+            PPrint('fatal', "Couldn't connect RPC. Check if the Application ID is correct (Located in settings.ini's [TEXT] rpc).")
             PPrint('', 'Press Enter to close.')
             input()
             exit()
@@ -142,29 +177,9 @@ def ConnectRPC(buttonState, game, con):
             buttons=[{"label": button1["label"], "url": button1["url"]},
                      {"label": button2["label"], "url": button2["url"]}])
     else:
-        if game.lower() not in modes:
-            statee = game
-            if buttonState == "False":          
-                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-                           large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                           buttons=[{"label": button1["label"], "url": button1["url"]}])
-            elif buttonState == "True":
-                rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-                           large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                           buttons=[{"label": button1["label"], "url": button1["url"]},
-                                    {"label": button2["label"], "url": button2["url"]}])           
-   
+        Mode(game)     
 
-    # Ramen Cafe
-    if game.lower() == "ramen":          
-        rpc.update(details= "Ramen Cafe", state= "Discord Server", large_image= "ramen",
-            large_text= "Ramen Cafe - Discord Server",
-            buttons=[{"label": "Join now!", "url": "https://discord.st/ramen"}])
-
-    # Sleeping
-    if game.lower() == "sleep":           
-        Sleep()
-
+    Mode(game)
     
     # PC Status
     #if game.lower() == "stats":
