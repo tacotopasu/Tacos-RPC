@@ -1,29 +1,39 @@
-from pypresence import Presence as DiscordRichPresence
-from configparser import ConfigParser
-import time, os, psutil, requests
+from configparser import ConfigParser # Used to get configs
+from ctypes import Structure, windll, c_uint, sizeof, byref # Used to detect idle time (all of this, I know right!)
+from pypresence import Presence as DiscordRichPresence # Used for Discord RPC
+import psutil, time, os, PIL.Image, pystray, threading # Used for time.sleep() and more
 
-keepGoing = True
-Connected = False
-os.system("")
 
-def Setup():
-    # Load config
-    config = ConfigParser()
-    config.read("settings.ini")
+os.system("") # Prepare color codes. We have to do this due to some weird cmd glitch...
+class LASTINPUTINFO(Structure): # Used in IdleDuration().
+    _fields_ = [
+        ('cbSize', c_uint),
+        ('dwTime', c_uint),
+    ]
 
-    global secondButton, button1, button2, text, image, sleeping, vr, timee
+config = ConfigParser() # Loading config
+config.read("settings.ini")
+secondButton = config["BUTTON"]["secondButton"] # Setting all vars for easier access later.
+button1 = config["BUTTON1"]                     # This can definetily be done better, but for now I'll go with this for simplicity.
+button2 = config["BUTTON2"]
+text = config["TEXT"]
+image = config["IMAGE"]
+sleeping = config["SLEEPING"]
+games = config["GAMES"]["games"].split(',')
+gameName = config["GAMES"]["gameName"].split(',')
+gameIcon = config["GAMES"]["icons"].split(',')
+defaultArgs = [text["details"], text["state"], image["largeImage"], text["imageText"], '', image["smallImage"], text["smallText"]] # Default arguments used in RPC.
+rpc = DiscordRichPresence(config["TEXT"]["rpc"], pipe = 0)
+rpc.connect()
 
-    #Get all the needed vars
-    secondButton = config["BUTTON"]["secondButton"]
-    button1 = config["BUTTON1"]
-    button2 = config["BUTTON2"]
-    text = config["TEXT"]
-    image = config["IMAGE"]
-    sleeping = config["SLEEPING"]
-    vr = config["VR"]
-    timee = time.time()
-    
-def PPrint(status, text): # Easier method for printing out better looking warnings and errors
+def IdleDuration(): # Get how long (seconds) the user has been AFK for.
+    lastInputInfo = LASTINPUTINFO()
+    lastInputInfo.cbSize = sizeof(lastInputInfo)
+    windll.user32.GetLastInputInfo(byref(lastInputInfo))
+    millis = windll.kernel32.GetTickCount() - lastInputInfo.dwTime
+    return int(millis // 1000.0)
+
+def PPrint(status, text): # Easier method for printing out better looking warnings and errors.
     if status == 'warn':
         status = '\033[33m[Warn] '
     elif status == 'error':
@@ -35,206 +45,73 @@ def PPrint(status, text): # Easier method for printing out better looking warnin
     
     print("\033[0m\033[1m" + status + f"\033[0m \033[1m{text}")
 
+def GamesOn(): # Get list with all games currently on.
+    global gamesOn
+    gamesOn = []
+    for x in games:
+            if(x in (i.name() for i in psutil.process_iter())):
+                gamesOn.append(x)
+    return gamesOn
 
-def Sleep():
-    os.system('cls')
-    Logo()
-    rpc.update(details= sleeping["details"], state= sleeping["state"], large_image= sleeping["large"], large_text= sleeping["largeText"])
-    print('\n')
-    PPrint('', 'Currently sleeping...')
-    PPrint('', 'Press Enter to wake up.')
-    input()
-    os.system('cls')
-    ConnectRPC(secondButton, "Just woke up...", Connected)
-
-
-def Mode(mode):
-    modee = mode.lower()
-    modes = ['ramen', 'sleep', 'afk']
-    if modee in modes:
-        if modee == "ramen":
-            rpc.update(details= "Ramen Cafe", state= "Discord Server", large_image= "ramen",
-            large_text= "Ramen Cafe - Discord Server",
-            buttons=[{"label": "Join now!", "url": "https://discord.st/ramen"}])
-        elif modee == "afk":
-            rpc.update(details= "AFK", state= "I'm currently busy touching grass.", large_image= "https://c.tenor.com/vpC3CpgHtT0AAAAM/persona5-tae-takemi.gif",
-            large_text= "Away from keyboard",
-            buttons=[{"label": "Join now!", "url": "https://tacotopasu.com/discord"}])
-        elif modee == "sleep":
-            Sleep()
+def IsGameOn(game): # Check the arg's (game) state.
+    if(game in (i.name() for i in psutil.process_iter())):
+        return True
     else:
-        if modee == "": # When the mode is null, replace it with the default var
-            mode = text["state"]
-        if secondButton == "False":          
-            rpc.update(details= text["details"], state= mode, large_image= image["largeImage"],
-                        large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                        buttons=[{"label": button1["label"], "url": button1["url"]}])
-        elif secondButton == "True":
-            rpc.update(details= text["details"], state= mode, large_image= image["largeImage"],
-                        large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-                        buttons=[{"label": button1["label"], "url": button1["url"]},
-                                 {"label": button2["label"], "url": button2["url"]}])  
+        return False
 
+def UpdateRPC(data): # Update RPC in a way simpler way!
+    details = data[0]
+    state = data[1]
+    largeImage = data[2]
+    largeImageTex = data[3]
+    startedAt = data[4]
+    smallImage = data[5]
+    smallImageTex = data[6]
 
-    
-config = ConfigParser()
-config.read("settings.ini")
-# Try to read settings.ini, if file isn't there, create template file
-myPath = os.path.realpath(__file__)
-completeName = os.path.join(myPath[:-8], 'settings.ini') 
-os.system(f'cd {myPath[:-8]}')
-if not os.path.exists(completeName):
-    PPrint('fatal', "Couldn't find 'settings.ini'.")
-    PPrint('info', 'Creating file...')
-    response = requests.get('https://raw.githubusercontent.com/tacotopasu/Discord-RichPresence/main/settings.ini')
-    open("settings.ini", "wb").write(response.content)
-    PPrint('info', 'File successfully created.')
-    PPrint('info', 'Running setup...')
-    myPath = os.path.realpath(__file__)
-    completeName = os.path.join(myPath[:-8], 'setup.py') 
-    os.system(f'cd {myPath[:-8]}')
-    if not os.path.exists(completeName):
-        response = requests.get('https://raw.githubusercontent.com/tacotopasu/Discord-RichPresence/main/setup.py')
-        open(completeName, "wb").write(response.content)
-    os.system(completeName)
-    settingsInstalled = True
-
-
-myPath = os.path.realpath(__file__)
-completeName = os.path.join(myPath[:-8], 'setup.py') 
-if not os.path.exists(completeName):
-    os.system(f'cd {myPath[:-8]}')
-    response = requests.get('https://raw.githubusercontent.com/tacotopasu/Discord-RichPresence/main/setup.py')
-    open(completeName, "wb").write(response.content)
-    os.system(completeName)
-
-
-try:
-    richpresence = config["TEXT"]["rpc"]
-except:
-    PPrint('fatal', "Couldn't get 'Discord Application ID' from 'settings.ini'.")
-    PPrint('', "Get your Discord Application ID at 'https://discord.com/developers/applications'.")
-    input('\nPress Enter to close.')
-    exit()
-# Try to use RPC's Client ID
-try:
-    PPrint('', 'Initializing RPC...')
-    rpc = DiscordRichPresence(richpresence, pipe = 0)
-except:
-    ## IF DISCORD IS RUNNING - MAKE CHECK NOWWW!!!!!
-    if("Discord.exe" not in (i.name() for i in psutil.process_iter())):
-        PPrint('fatal', 'Discord is not open! Open discord and then try opening me again!')
-        input('\nPress Enter to close.')
-        exit()
-    PPrint('fatal', "Couldn't connect using the Discord Application ID that was set in 'settings.ini'.")
-    PPrint('', "This can be caused by a lack of connection to the internet or an invalid Discord Application ID.")
-    PPrint('', "Check your Internet connection and if the error persists run 'setup.py'.")
-    PPrint('', "If you haven't yet, get your Discord Application ID at 'https://discord.com/developers/applications'.")
-    input('\nPress Enter to close.')
-    exit()
-
-
-
-def Logo():
-    print("\u001b[35m _____               _        __    ___  ___ \n/__   \__ _  ___ ___( )__    /__\  / _ \/ __\ \n  / /\/ _` |/ __/ _ \/ __|  / \// / /_)/ /  \n / / | (_| | (_| (_) \__ \ / _  \/ ___/ /___ \n \/   \__,_|\___\___/|___/ \/ \_/\/   \____/\033[0m")
-
-
-stopStats = 0
-def Stats(): # Loops forever, I'll finish later...
-    killMe = stopStats
-    while killMe == 0:
-        cpu_per = round(psutil.cpu_percent(),1) # Get CPU Usage
-        # mem = psutil.virtual_memory() # Get Ram Usage
-        mem_per = round(psutil.virtual_memory().percent,1) # Get Ram Usage in %
-        rpc.update(details= "Taco's PC Status", state="CPU "+str(cpu_per)+"%"+" / RAM "+str(mem_per)+"%")
-        killMe = stopStats
-        time.sleep(5)
-        
-
-# Connect RPC Function 
-def ConnectRPC(buttonState, game, con):
-    modes = ['ramen', 'sleep', 'stats']
-    Setup()
-    if not con:
-        try:
-            rpc.connect()
-            PPrint('info', 'RPC Connected.')
-            time.sleep(1)
-        except:
-            PPrint('fatal', "Couldn't connect RPC. Check if the Application ID is correct (Located in settings.ini's [TEXT] rpc).")
-            PPrint('', 'Press Enter to close.')
-            input()
-            exit()
-    if game == "": # Default State ('game' var is empty)
-        statee = text["state"]
-        if buttonState == "False":            
-            rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-            large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-            buttons=[{"label": button1["label"], "url": button1["url"]}])
-        elif buttonState == "True":
-            rpc.update(details= text["details"], state= statee, large_image= image["largeImage"],
-            large_text=text["imageText"], start= timee, small_image = image["smallImage"], small_text = text["smallText"],
-            buttons=[{"label": button1["label"], "url": button1["url"]},
-                     {"label": button2["label"], "url": button2["url"]}])
+    if secondButton == '1':
+        buttons = [{"label": button1["label"], "url": button1["url"]}, {"label": button2["label"], "url": button2["url"]}]
     else:
-        Mode(game)     
+        buttons = [{"label": button1["label"], "url": button1["url"]}]
 
-    Mode(game)
-    
-    # PC Status
-    #if game.lower() == "stats":
-    #    warning = False
-    #    if(not warning):
-    #        PPrint('info', "This is a new feature, and since bugs are expected feel free to report any errors to 'https://github.com/tacotopasu/Discord-RichPresence/issues'.")
-    #        warning = True
-    #    Stats()
-    #    # Bad method but works fine for now
-    #    PPrint('', 'Press Enter to stop stats.')
-    #    input()
-    #    global stopStats
-    #    stopStats = 1
-    #    ConnectRPC(secondButton, "", Connected)
+    if startedAt == '1':
+        rpc.update(details = details, state = state, large_image = largeImage, large_text = largeImageTex, start = time.time(),
+                    small_image = smallImage, small_text = smallImageTex, buttons = buttons)
+    else:
+        rpc.update(details = details, state = state, large_image = largeImage, large_text = largeImageTex,
+                    small_image = smallImage, small_text = smallImageTex, buttons = buttons)
 
 
+# System Tray Section
+trayIcon = PIL.Image.open('icon.jpg')
+def on_clicked(icon, item):
+    if str(item) == "Exit":
+        icon.stop()
+        os._exit(0)
+icon = pystray.Icon("Taco's RPC", trayIcon, menu = pystray.Menu(
+    pystray.MenuItem("Taco's RPC", on_clicked, enabled= False),
+    pystray.MenuItem("Exit", on_clicked)))
+def Tray():
+    icon.run()
+threading.Thread(target = Tray).start()
+# System Tray Section End
 
-Setup()
-ConnectRPC(secondButton, "", Connected)
-Connected = True
+print("Creating RPC.")
+UpdateRPC(defaultArgs) # Create RPC with the default set arguments.
+print("RPC Created.")
+gamesAlreadyOn = ['placeholder!']
+lastGame = ''
 
-vrMode = False
+print("Starting while loop(?)")
 while True:
-    if keepGoing:
-        os.system('cls')
-        Logo()
-        choice = input("\n\nWhat game are you playing right now? (Press Enter to close.)\n> ")
-        if choice == "":
-            PPrint('', 'Are you sure you want to exit? Press Enter to confirm (Type anything to cancel).')
-            exitt = input()
-            if exitt == '': exit()
-        if choice.lower() == 'vr':
-            vrMode = True
-            keepGoing = False
-        else:
-            ConnectRPC(secondButton, choice, Connected)
-    if vrMode:
-        buttonState = secondButton
-        os.system('cls')
-        PPrint('', 'What game are you playing right now? (Press Enter to leave VR Mode.)')
-        choice = input('> ')
-        if choice != "":
-            statee = choice
-            if buttonState == "False":          
-                rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
-                        large_text=vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
-                        buttons=[{"label": button1["label"], "url": button1["url"]}])
-            elif buttonState == "True":
-                rpc.update(details= vr["details"], state= statee, large_image= vr["largeImage"],
-                        large_text= vr["imageText"], start= timee, small_image = vr["smallImage"], small_text = vr["smallText"],
-                        buttons=[{"label": button1["label"], "url": button1["url"]},
-                                {"label": button2["label"], "url": button2["url"]}])
-        else:
-            keepGoing = True
-            vrMode = False
-            time.sleep(1)
-            ConnectRPC(secondButton, "", Connected)
+    print("While loop running")
+    GamesOn()
+    if gamesAlreadyOn != gamesOn and gamesOn != [] and lastGame not in gamesOn: # If the games on haven't changed AND if the current games list isn't empty AND last game is not currently open:
+        gamesAlreadyOn = gamesOn
+        args = [text["details"], gameName[games.index(gamesOn[0])], gameIcon[games.index(gamesOn[0])], text["imageText"], '1', image["smallImage"], text["smallText"]]
+        UpdateRPC(args)
+        lastGame = gamesOn[0]
 
+    if gamesOn == []: # If no game is currently on:
+        UpdateRPC(defaultArgs)
+
+    time.sleep(5)
