@@ -1,5 +1,6 @@
 from configparser import ConfigParser # Used to get configs
-from ctypes import Structure, windll, c_uint, sizeof, byref # Used to detect idle time (all of this, I know right!)
+from ctypes import Structure, windll, c_uint, sizeof, byref
+from warnings import catch_warnings # Used to detect idle time (all of this, I know right!)
 from pypresence import Presence as DiscordRichPresence # Used for Discord RPC
 import psutil, time, os, PIL.Image, pystray, threading # Used for time.sleep() and more
 
@@ -68,7 +69,7 @@ def UpdateRPC(data): # Update RPC in a way simpler way!
     smallImage = data[5]
     smallImageTex = data[6]
 
-    if secondButton == '1':
+    if secondButton == 'True':
         buttons = [{"label": button1["label"], "url": button1["url"]}, {"label": button2["label"], "url": button2["url"]}]
     else:
         buttons = [{"label": button1["label"], "url": button1["url"]}]
@@ -82,7 +83,11 @@ def UpdateRPC(data): # Update RPC in a way simpler way!
 
 
 # System Tray Section
-trayIcon = PIL.Image.open('icon.jpg')
+try:
+    trayIcon = PIL.Image.open('icon.jpg')
+except:
+    PPrint("error","Error occured! Can't get icon!")
+
 def on_clicked(icon, item):
     if str(item) == "Exit":
         icon.stop()
@@ -103,7 +108,6 @@ lastGame = ''
 
 print("Starting while loop(?)")
 while True:
-    print("While loop running")
     GamesOn()
     if gamesAlreadyOn != gamesOn and gamesOn != [] and lastGame not in gamesOn: # If the games on haven't changed AND if the current games list isn't empty AND last game is not currently open:
         gamesAlreadyOn = gamesOn
