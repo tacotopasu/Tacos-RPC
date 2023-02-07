@@ -4,10 +4,6 @@
 
 [![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=python&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
 
-  <p align="center">
-   Made with ❤️ by @tacotopasu <a href="https://twitter.com/tacotopasu"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/tacotopasu?style=social"> </a>
-  </p>
-
 
 ## Features
 
