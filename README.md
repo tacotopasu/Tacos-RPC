@@ -1,25 +1,10 @@
 # Taco's RPC
 
-🚀A Customizable Discord Custom Rich Presence Application
+🚀A Simplistic Customizable Discord Custom Rich Presence Application
 
-[![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=python&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
+With this simple program, you can have your very own Discord Rich Presence without being disrupted!
+- It stays quietly working in your system tray without ever bothering you.
+- You can update your config anytime and, without needing to restart the program, it will refresh your RPC.
+This program is very flawed and simple, so if you want to contribute in any way, send a push request. I will promptly review them!
 
-
-## Features
-
-📖 It's Open Source!
-
-⛓️ Easy to Share your RPC with others!
-
-📠 Lots of customization avaliable!
-
-
-## 🤝 Contributing
-
-All contributions, issues and feature requests are welcome! 😍
-
-## ⭐️Show your support
-
-Give a ⭐️ if this project helped you! 🥰
-
-Perhaps leave me a follow on Twitter too! ;3
+Optionally, you can also star ⭐ the repository. Stars look cool in my profile, you know. 😎 
