@@ -8,3 +8,5 @@ With this simple program, you can have your very own Discord Rich Presence witho
 This program is very flawed and simple, so if you want to contribute in any way, send a push request. I will promptly review them!
 
 Optionally, you can also star ⭐ the repository. Stars look cool in my profile, you know. 😎 
+
+Tutorial and config documentation soon™
