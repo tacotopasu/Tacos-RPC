@@ -10,3 +10,9 @@ This program is very flawed and simple, so if you want to contribute in any way,
 Optionally, you can also star ⭐ the repository. Stars look cool in my profile, you know. 😎 
 
 Tutorial and config documentation soon™
+
+📝 To-do:
+- Add OPTIONALLY start-up with windows.
+- Add Carousel mode for state (cycle through an array of messages every x seconds)
+- Unspagghettify code
+- ...
