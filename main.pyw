@@ -1,7 +1,6 @@
 from configparser import ConfigParser # Used to get configs
 from pypresence import Presence as DiscordRichPresence # Used for Discord RPC
-import time, os, PIL.Image, pystray, threading # Used for system tray and more
-
+import time, os, PIL.Image, PIL.ImageDraw, pystray, threading # Used for system tray and more
 
 config = ConfigParser() # Loading config
 config.read("settings.ini")
@@ -15,7 +14,18 @@ defaultArgs = [text["details"], text["state"], image["largeImage"], text["imageT
 rpc = DiscordRichPresence(config["PRESENCE"]["rpc"], pipe = 0)
 rpc.connect()
 
+def create_image():
+    # Generate an image and draw a pattern
+    image = PIL.Image.new('RGB', (64, 64), 'black')
+    dc = PIL.ImageDraw.Draw(image)
+    dc.rectangle(
+        (64 // 2, 0, 64, 64 // 2),
+        fill='white')
+    dc.rectangle(
+        (0, 64 // 2, 64 // 2, 64),
+        fill='white')
 
+    return image
 
 def UpdateRPC(data):
     details = data[0]
@@ -40,16 +50,12 @@ def UpdateRPC(data):
 
 
 # System Tray Section Start
-try:
-    trayIcon = PIL.Image.open('icon.jpg')
-except:
-    print("Error occured! Can't get icon!")
 
 def on_clicked(icon, item):
     if str(item) == "Exit":
         icon.stop()
         os._exit(0)
-icon = pystray.Icon("Taco's RPC", trayIcon, menu = pystray.Menu(
+icon = pystray.Icon("Taco's RPC", icon = create_image(), menu = pystray.Menu(
     pystray.MenuItem("Taco's RPC", on_clicked, enabled = False),
     pystray.MenuItem("Exit", on_clicked)))
 def Tray():
