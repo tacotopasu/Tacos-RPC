@@ -1,4 +1,4 @@
-Pillow==9.3.0
+Pillow==10.0.1
 psutil==5.9.1
 pypresence==4.2.1
 pystray==0.19.4
